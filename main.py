@@ -1,32 +1,43 @@
 with open('./puzzle.txt') as file:
-    puzzle = file.readlines()
+    puzzle = [line.rstrip().split(' ') for line in file.readlines()]
 
 
 if __name__ == "__main__":
-    elfs = [[]]
-    calories = []
+    # A = Rock = X
+    # B = Paper = Y
+    # C = Scissors = Z
+    answers = {'A': 'Y', 'B': 'Z', 'C': "X"}
+    equals = {'A':'X','B':"Y",'C':"Z"}
+    values = {'X': 1, 'Y': 2, 'Z': 3}
+    # rock = [1, 'A', 'Y']
+    # paper = [2, 'B', 'Z']
+    # scissors = [3, 'C', 'X']
+    results = []
 
-    for number in puzzle:
-        if number == '\n':
-            elfs.append([])
+    for game in puzzle:
+        opponent, answer = game
+        if answer == equals[opponent]:
+            results.append(values[answer]+3)
+        elif answer == answers[opponent]:
+            results.append(values[answer]+6)
         else:
-            elfs[-1].append(int(number.rstrip()))
-
-    for elf in elfs:
-        calories.append(sum(elf))
+            results.append(values[answer])
 
     print('Part One')
-    print('Max elf>', calories.index(max(calories))+1)
-    print('Calories>', max(calories))
-
+    print('Sum',sum(results))
 # ===================== Part Two ================================
-
-    three_top = []
-    for i in range(0,3):
-        three_top.append(max(calories))
-        calories.remove(max(calories))
+    results = []
+    
+    for game in puzzle:
+        opponent, answer = game
+        if answer == 'Y':
+            results.append(values[equals[opponent]]+3)
+        elif answer == 'Z':
+            results.append(values[answers[opponent]]+6)
+        else:
+            loser_item = [item for item in answers if answers[item] == equals[opponent]][0]
+            results.append(values[equals[loser_item]])
 
     print('\nPart Two')
-    print('Top three>', three_top)
-    print('Calories>', sum(three_top))
-    
+    print('Sum',sum(results))
+
