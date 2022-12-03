@@ -1,43 +1,41 @@
 with open('./puzzle.txt') as file:
-    puzzle = [line.rstrip().split(' ') for line in file.readlines()]
-
+    puzzle =[line.rstrip() for line in file.readlines()]
+    alphabet = 'a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z'.split(', ')
+    alphabet_upper = [char.upper() for char in alphabet]
+    alphabet = alphabet+alphabet_upper
+    # print(puzzle)
 
 if __name__ == "__main__":
-    # A = Rock = X
-    # B = Paper = Y
-    # C = Scissors = Z
-    answers = {'A': 'Y', 'B': 'Z', 'C': "X"}
-    equals = {'A':'X','B':"Y",'C':"Z"}
-    values = {'X': 1, 'Y': 2, 'Z': 3}
-    # rock = [1, 'A', 'Y']
-    # paper = [2, 'B', 'Z']
-    # scissors = [3, 'C', 'X']
     results = []
-
-    for game in puzzle:
-        opponent, answer = game
-        if answer == equals[opponent]:
-            results.append(values[answer]+3)
-        elif answer == answers[opponent]:
-            results.append(values[answer]+6)
-        else:
-            results.append(values[answer])
-
+    for line in puzzle:
+        length = len(line)
+        for letter in line:
+            common = line.find(letter,0,int(length/2)) != -1 and line.find(letter,int(length/2)) != -1
+            if common:
+                results.append(letter)
+                break 
+    
+    results = [alphabet.index(l)+1 for l in results]
     print('Part One')
-    print('Sum',sum(results))
+    print('Sum:',sum(results))
+
 # ===================== Part Two ================================
     results = []
+    i = 0
     
-    for game in puzzle:
-        opponent, answer = game
-        if answer == 'Y':
-            results.append(values[equals[opponent]]+3)
-        elif answer == 'Z':
-            results.append(values[answers[opponent]]+6)
-        else:
-            loser_item = [item for item in answers if answers[item] == equals[opponent]][0]
-            results.append(values[equals[loser_item]])
-
+    while True:
+        if i == len(puzzle):
+            break
+        group = [puzzle[i],puzzle[i+1],puzzle[i+2]]
+       
+        for letter in ''.join(group):
+            common  = letter if group[0].find(letter) != -1 and group[1].find(letter) != -1 and group[2].find(letter)!=-1 else False
+            if common:
+                results.append(common)
+                break
+        i+=3
+   
+    results = [alphabet.index(l)+1 for l in results]
     print('\nPart Two')
-    print('Sum',sum(results))
-
+    print('Sum:',sum(results))
+    
