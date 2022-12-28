@@ -1,32 +1,42 @@
-with open('./puzzle.txt') as file:
-    puzzle = file.readlines()
+def add_path_to_directories(path, directories):
+    if path not in directories.keys():
+        directories[path] = 0
+    return directories
 
 
-if __name__ == "__main__":
-    elfs = [[]]
-    calories = []
+def solution():
+    f = open('puzzle.txt', 'r')
+    directories_size = {}
+    current_stack = []
+    current_path = ""
+    for line in f:
+        if line.startswith("$ cd"):
+            if not line.startswith("$ cd ..") and not line.startswith("$ cd /"):
+                current_path += f"/{line.split()[-1]}" if current_path != "/" else line.split()[-1]
+                current_stack.append(current_path)
+                directories_size = add_path_to_directories(current_path, directories_size)
 
-    for number in puzzle:
-        if number == '\n':
-            elfs.append([])
-        else:
-            elfs[-1].append(int(number.rstrip()))
+            elif line.strip() == "$ cd /":
+                current_path = "/"
+                current_stack = ["/"]
+                directories_size = add_path_to_directories(current_path, directories_size)
 
-    for elf in elfs:
-        calories.append(sum(elf))
+            elif line.strip() == "$ cd ..":
+                current_path = "/".join(current_path.split("/")[:-1])
+                current_stack.pop()
 
-    print('Part One')
-    print('Max elf>', calories.index(max(calories))+1)
-    print('Calories>', max(calories))
-
-# ===================== Part Two ================================
-
-    three_top = []
-    for i in range(0,3):
-        three_top.append(max(calories))
-        calories.remove(max(calories))
-
-    print('\nPart Two')
-    print('Top three>', three_top)
-    print('Calories>', sum(three_top))
+        if line[0].isdigit():
+            file_size = int(line.split()[0])
+            for directory in current_stack:
+                directories_size[directory] += file_size
+    MAX_USED_SIZE = 70000000-30000000
+    final_list_task_1 = [el for el in directories_size.values() if el <= 100000]
+    print("Task 1:")
+    print(sum(final_list_task_1))
+    current_root_size = directories_size["/"]
     
+    space_to_free = current_root_size - MAX_USED_SIZE
+    final_list_task_2 = sorted([el for el in directories_size.values() if el >= space_to_free])
+    print("Task 2:")
+    print(final_list_task_2[0])
+solution()
