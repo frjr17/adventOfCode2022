@@ -1,42 +1,104 @@
-def add_path_to_directories(path, directories):
-    if path not in directories.keys():
-        directories[path] = 0
-    return directories
+with open('./puzzle.txt') as file:
+    puzzle = [[a for a in line.strip()] for line in file.readlines()]
+    height = len(puzzle)
+    length = len(puzzle[0])
+    height_range = range(1, height-1)
+    length_range = range(1, length-1)
 
 
-def solution():
-    f = open('puzzle.txt', 'r')
-    directories_size = {}
-    current_stack = []
-    current_path = ""
-    for line in f:
-        if line.startswith("$ cd"):
-            if not line.startswith("$ cd ..") and not line.startswith("$ cd /"):
-                current_path += f"/{line.split()[-1]}" if current_path != "/" else line.split()[-1]
-                current_stack.append(current_path)
-                directories_size = add_path_to_directories(current_path, directories_size)
+def look_top(number, i, j):
+    result = True
+    scenic_score = 0
+    k = 1
+    while i-k in range(0, height):
+        result = bool(puzzle[i-k][j] < number)
 
-            elif line.strip() == "$ cd /":
-                current_path = "/"
-                current_stack = ["/"]
-                directories_size = add_path_to_directories(current_path, directories_size)
+        scenic_score += 1
+        if result == False:
+            break
+        k += 1
 
-            elif line.strip() == "$ cd ..":
-                current_path = "/".join(current_path.split("/")[:-1])
-                current_stack.pop()
+    return result, scenic_score
 
-        if line[0].isdigit():
-            file_size = int(line.split()[0])
-            for directory in current_stack:
-                directories_size[directory] += file_size
-    MAX_USED_SIZE = 70000000-30000000
-    final_list_task_1 = [el for el in directories_size.values() if el <= 100000]
-    print("Task 1:")
-    print(sum(final_list_task_1))
-    current_root_size = directories_size["/"]
-    
-    space_to_free = current_root_size - MAX_USED_SIZE
-    final_list_task_2 = sorted([el for el in directories_size.values() if el >= space_to_free])
-    print("Task 2:")
-    print(final_list_task_2[0])
-solution()
+
+def look_bottom(number, i, j):
+    result = True
+    scenic_score = 0
+    k = 1
+    while i+k in range(0, height):
+        result = bool(puzzle[i+k][j] < number)
+
+        scenic_score += 1
+        if result == False:
+            break
+        k += 1
+
+    return result, scenic_score
+
+
+def look_left(number, i, j):
+    result = True
+    k = 1
+    scenic_score = 0
+
+    while j-k in range(0, length):
+        result = bool(puzzle[i][j-k] < number)
+
+        scenic_score += 1
+        if result == False:
+            break
+        k += 1
+
+    return result, scenic_score
+
+
+def look_right(number, i, j):
+    result = True
+    k = 1
+    scenic_score = 0
+
+    while j+k in range(0, length):
+        result = bool(puzzle[i][j+k] < number)
+
+        scenic_score += 1
+        if result == False:
+            break
+        k += 1
+
+    return result, scenic_score
+
+
+def look_visibility(number, i, j):
+    # print('Top Visibility:',look_top(number,i,j))
+    # print('Bottom Visibility:',look_bottom(number,i,j))
+    # print('Left Visibility:',look_left(number,i,j))
+    # print('Right Visibility:',look_right(number,i,j))
+    top = look_top(number, i, j)
+    bottom = look_bottom(number, i, j)
+    left = look_left(number, i, j)
+    right = look_right(number, i, j)
+    visibility = top[0] or bottom[0] or left[0] or right[0]
+    scenic_score = top[1] * bottom[1] * left[1] * right[1]
+    return visibility, scenic_score
+
+
+if __name__ == "__main__":
+    result = height*2+(length-2)*2
+    scenic_scores = []
+    for i in height_range:
+        for j in length_range:
+            number = puzzle[i][j]
+            visibility, scenic_score = look_visibility(number, i, j)
+            scenic_scores.append(scenic_score)
+            if visibility:
+                result += 1
+
+    # Printing Results
+    print('\nPart One')
+    print('Resp:', result)
+
+# ===================== Part Two ================================
+
+    # Printing Results
+    print('\nPart Two')
+    print('Resp:', max(scenic_scores))
